@@ -1,0 +1,116 @@
+SonarQube - Code Quality Analysis
+by
+SimbuDevOps
+
+--------------------------------------------------------------------------------
+
+STEP 1: Jenkins Tools
+
+Jenkins Dashboard
+→ Manage Jenkins
+→ Tools
+
+JDK:
+Name: java21
+
+Maven:
+Name: maven3
+
+SonarQube Scanner:
+Name: sonar-scanner
+
+--------------------------------------------------------------------------------
+
+STEP 2: SonarQube Server
+
+docker run -d --name sonarqube -p 9000:9000 sonarqube:lts-community
+
+Check:
+
+docker ps
+
+Access:
+
+http://<SONARQUBE-SERVER>:9000
+
+Create a SonarQube token from SonarQube security settings.
+
+Never store the token in this repository.
+
+--------------------------------------------------------------------------------
+
+STEP 3: Jenkins SonarQube Configuration
+
+Jenkins Dashboard
+→ Manage Jenkins
+→ System
+→ SonarQube servers
+
+Name:
+sonar-server
+
+Server URL:
+http://<SONARQUBE-SERVER>:9000
+
+Select the Jenkins credential containing your SonarQube token.
+
+--------------------------------------------------------------------------------
+
+STEP 4: Jenkins Docker Credentials
+
+Jenkins Dashboard
+→ Manage Jenkins
+→ Credentials
+→ Global
+→ Add Credentials
+
+Kind:
+Username with password
+
+ID:
+dockerhub-credentials
+
+Use your own Docker Hub username and password/token.
+
+--------------------------------------------------------------------------------
+
+STEP 5: GitHub Repository
+
+https://github.com/simbudevops/SonarQube-Project-Simbu.git
+
+Branch:
+main
+
+--------------------------------------------------------------------------------
+
+STEP 6: Jenkins Pipeline
+
+Git Checkout
+→ Compile
+→ Test
+→ SonarQube Analysis
+→ Maven Build
+→ Docker Build
+→ Docker Push
+→ Run Docker Container
+
+--------------------------------------------------------------------------------
+
+STEP 7: Docker Application
+
+Container name:
+sonarqube-project-simbu
+
+Application port:
+5555
+
+Docker image:
+simbudevops7497/sonarqube-project-simbu:1.0.0
+
+--------------------------------------------------------------------------------
+
+IMPORTANT
+
+If your Docker Hub username is different, change DOCKERHUB_USERNAME in Jenkinsfile.
+
+Do not commit passwords, access tokens or SonarQube tokens to GitHub.

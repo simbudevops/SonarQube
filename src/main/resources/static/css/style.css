@@ -1,0 +1,68 @@
+/* General Styling */
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #F5F7FA;
+    font-family: 'Poppins', sans-serif;
+}
+
+.app-container {
+    text-align: center;
+    background-color: #FFFFFF;
+    border: 2px solid #E1E5EB;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 600px;
+    position: relative;
+}
+
+.app-title {
+    font-size: 25px;
+    font-weight: 700;
+    color: #FF5733;
+    margin-bottom: 40px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.youtube-links {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.youtube-button {
+    background-color: #1F80E0;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.youtube-button:hover {
+    background-color: #00A8E1;
+}
+
+.youtube-icon {
+    width: 25px;
+    height: 25px;
+}
+
+.footer-message {
+    font-size: 20px;
+    font-weight: 700;
+    color: #2ECC71;
+    font-family: 'Poppins', sans-serif;
+}
