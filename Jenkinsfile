@@ -34,7 +34,7 @@ pipeline {
 
         stage('Sonar Analysis') {
             steps {
-                withSonarQubeEnv('sonar-server') {
+                withSonarQubeEnv('sonar-scanner') {
                     sh '''
                         $SCANNER_HOME/bin/sonar-scanner                           -Dsonar.projectName=SonarQube-Project-Simbu                           -Dsonar.projectKey=SonarQube-Project-Simbu                           -Dsonar.projectVersion=1.0.0                           -Dsonar.java.binaries=target
                     '''
