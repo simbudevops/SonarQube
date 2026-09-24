@@ -1,13 +1,3 @@
-
-So let's fix this at the **Git/Jenkins level**, not by changing Maven again.
-
-### 1. Replace your `pom.xml` with this exact file
-
-In your GitHub repository's **`dev` branch**, replace the entire `pom.xml` with the following.
-
-**Do not copy the Markdown fence characters into the file.**
-
-:::writing{variant="document" id="52947" title="Final pom.xml"}
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -70,12 +60,3 @@ In your GitHub repository's **`dev` branch**, replace the entire `pom.xml` with 
     </build>
 
 </project>
-:::
-
-### 2. Verify GitHub, not Jenkins
-
-On your local machine:
-
-```bash
-git clone -b dev https://github.com/simbudevops/SonarQube.git test-sonarqube
-cd test-sonarqube
