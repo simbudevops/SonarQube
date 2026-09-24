@@ -1,93 +1,154 @@
 pipeline {
-    agent any
 
-    tools {
-        jdk 'java21'
-        maven 'maven3'
+````
+agent any
+
+tools {
+    jdk 'Java21'
+    maven 'Maven3'
+}
+
+environment {
+    DOCKER_IMAGE = 'simbudevops7497/sonarqube-project-simbu'
+    IMAGE_TAG = '1.0.0'
+    DOCKER_CREDENTIALS = 'dockerhub'
+}
+
+stages {
+
+    stage('Checkout') {
+        steps {
+            checkout scm
+        }
     }
 
-    environment {
-        SCANNER_HOME = tool 'sonar-scanner'
-        DOCKERHUB_USERNAME = 'simbudevops7497'
-        DOCKER_IMAGE = "${DOCKERHUB_USERNAME}/sonarqube-project-simbu:1.0.0"
+    stage('Verify POM') {
+        steps {
+            sh '''
+                echo "===== Java ====="
+                java -version
+
+                echo "===== Maven ====="
+                mvn -version
+
+                echo "===== Git Branch ====="
+                git branch --show-current
+
+                echo "===== Checking pom.xml ====="
+                if grep -n '```' pom.xml; then
+                    echo "ERROR: Markdown backticks found in pom.xml"
+                    exit 1
+                fi
+
+                echo "POM is valid."
+            '''
+        }
     }
 
-    stages {
-        stage('Git Checkout') {
-            steps {
-                git branch: 'master',
-                    url: 'https://github.com/simbudevops/SonarQube.git'
-            }
+    stage('Compile') {
+        steps {
+            sh 'mvn clean compile'
         }
+    }
 
-        stage('Compile') {
-            steps {
-                sh 'mvn compile'
-            }
+    stage('Test') {
+        steps {
+            sh 'mvn test'
         }
+    }
 
-        stage('Test') {
-            steps {
-                sh 'mvn test'
-            }
-        }
-
-        stage('Sonar Analysis') {
-            steps {
-                withSonarQubeEnv('sonar-scanner') {
-                    sh '''
-                        $SCANNER_HOME/bin/sonar-scanner                           -Dsonar.projectName=SonarQube-Project-Simbu                           -Dsonar.projectKey=SonarQube-Project-Simbu                           -Dsonar.projectVersion=1.0.0                           -Dsonar.java.binaries=target
-                    '''
-                }
-            }
-        }
-
-        stage('Build') {
-            steps {
-                sh 'mvn package'
-            }
-        }
-
-        stage('Docker Build') {
-            steps {
-                sh 'docker build -t $DOCKER_IMAGE .'
-            }
-        }
-
-        stage('Docker Push to DockerHub') {
-            steps {
-                withCredentials([
-                    usernamePassword(
-                        credentialsId: 'dockerhub-credentials',
-                        usernameVariable: 'DOCKERHUB_USERNAME',
-                        passwordVariable: 'DOCKERHUB_PASSWORD'
-                    )
-                ]) {
-                    sh '''
-                        echo "$DOCKERHUB_PASSWORD" | docker login                           -u "$DOCKERHUB_USERNAME"                           --password-stdin
-
-                        docker push "$DOCKER_IMAGE"
-                    '''
-                }
-            }
-        }
-
-        stage('Run Docker Container') {
-            steps {
+    stage('Sonar Analysis') {
+        steps {
+            withSonarQubeEnv('SonarQube') {
                 sh '''
-                    docker stop sonarqube-project-simbu || true
-                    docker rm sonarqube-project-simbu || true
-
-                    docker run -d                       --name sonarqube-project-simbu                       -p 5555:5555                       "$DOCKER_IMAGE"
+                    mvn sonar:sonar \
+                    -Dsonar.projectKey=sonarqube-project-simbu \
+                    -Dsonar.projectName=sonarqube-project-simbu
                 '''
             }
         }
     }
 
-    post {
-        always {
-            echo 'Cleaning up workspace...'
-            cleanWs()
+    stage('Build') {
+        steps {
+            sh 'mvn clean package -DskipTests'
         }
     }
+
+    stage('Check Docker') {
+        steps {
+            sh '''
+                echo "===== Docker Version ====="
+                docker version
+
+                echo "===== Docker Access ====="
+                docker ps
+            '''
+        }
+    }
+
+    stage('Docker Build') {
+        steps {
+            sh '''
+                docker build \
+                -t ${DOCKER_IMAGE}:${IMAGE_TAG} \
+                .
+            '''
+        }
+    }
+
+    stage('Docker Push to DockerHub') {
+        steps {
+            withCredentials([
+                usernamePassword(
+                    credentialsId: "${DOCKER_CREDENTIALS}",
+                    usernameVariable: 'DOCKER_USERNAME',
+                    passwordVariable: 'DOCKER_PASSWORD'
+                )
+            ]) {
+                sh '''
+                    echo "$DOCKER_PASSWORD" | docker login \
+                    -u "$DOCKER_USERNAME" \
+                    --password-stdin
+
+                    docker push ${DOCKER_IMAGE}:${IMAGE_TAG}
+
+                    docker logout
+                '''
+            }
+        }
+    }
+
+    stage('Run Docker Container') {
+        steps {
+            sh '''
+                docker rm -f sonarqube-project-simbu 2>/dev/null || true
+
+                docker run -d \
+                --name sonarqube-project-simbu \
+                -p 8080:8080 \
+                ${DOCKER_IMAGE}:${IMAGE_TAG}
+
+                docker ps
+            '''
+        }
+    }
+}
+
+post {
+    success {
+        echo 'Pipeline completed successfully.'
+    }
+
+    failure {
+        echo 'Pipeline failed.'
+    }
+
+    always {
+        echo 'Cleaning workspace...'
+        cleanWs()
+    }
+}
+````
+
 }
