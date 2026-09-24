@@ -9,6 +9,14 @@ tools {
 
 stages {
 
+    stage('Check') {
+        steps {
+            sh 'java -version'
+            sh 'mvn -version'
+            sh 'docker --version'
+        }
+    }
+
     stage('Compile') {
         steps {
             sh 'mvn clean compile'
@@ -21,7 +29,7 @@ stages {
         }
     }
 
-    stage('Sonar Analysis') {
+    stage('SonarQube') {
         steps {
             withSonarQubeEnv('SonarQube') {
                 sh 'mvn sonar:sonar -Dsonar.projectKey=sonarqube-project-simbu -Dsonar.projectName=sonarqube-project-simbu'
@@ -29,7 +37,7 @@ stages {
         }
     }
 
-    stage('Build') {
+    stage('Package') {
         steps {
             sh 'mvn clean package -DskipTests'
         }
@@ -41,7 +49,7 @@ stages {
         }
     }
 
-    stage('Docker Push to DockerHub') {
+    stage('Docker Push') {
         steps {
             withCredentials([
                 usernamePassword(
@@ -59,7 +67,7 @@ stages {
         }
     }
 
-    stage('Run Docker Container') {
+    stage('Run Container') {
         steps {
             sh '''
                 docker rm -f sonarqube-project-simbu || true
