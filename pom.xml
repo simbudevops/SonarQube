@@ -7,7 +7,6 @@
 ```
 <modelVersion>4.0.0</modelVersion>
 
-<!-- Spring Boot Parent -->
 <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
@@ -15,13 +14,14 @@
     <relativePath/>
 </parent>
 
-<!-- Project Information -->
 <groupId>com.simbudevops</groupId>
 <artifactId>sonarqube-project-simbu</artifactId>
 <version>1.0.0</version>
 <packaging>jar</packaging>
 
-<!-- Java 21 -->
+<name>sonarqube-project-simbu</name>
+<description>Spring Boot SonarQube Jenkins Project</description>
+
 <properties>
     <java.version>21</java.version>
     <maven.compiler.source>21</maven.compiler.source>
@@ -29,7 +29,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 </properties>
 
-<!-- Dependencies -->
 <dependencies>
 
     <!-- Spring Boot Web -->
@@ -44,7 +43,7 @@
         <artifactId>spring-boot-starter-thymeleaf</artifactId>
     </dependency>
 
-    <!-- Spring Boot Testing -->
+    <!-- Spring Boot Test -->
     <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-test</artifactId>
@@ -53,7 +52,6 @@
 
 </dependencies>
 
-<!-- Build Configuration -->
 <build>
     <plugins>
 
