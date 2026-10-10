@@ -7,8 +7,10 @@ pipeline {
     }
 
     environment {
-        IMAGE_NAME = 'simbudevops7497/sonarqube-project-simbu'
-        IMAGE_TAG  = '1.0.0'
+        SCANNER_HOME = tool 'sonar-scanner'
+        IMAGE_NAME   = 'simbudevops7497/sonarqube-project-simbu'
+        IMAGE_TAG    = '1.0.0'
+        DOCKER_IMAGE = "${IMAGE_NAME}:${IMAGE_TAG}"
     }
 
     stages {
@@ -33,60 +35,56 @@ pipeline {
             }
         }
 
-        stage('SonarQube') {
+        stage('Sonar Analysis') {
             steps {
                 withSonarQubeEnv('sonar') {
-                    sh '''
-                        mvn sonar:sonar \
+                    sh """
+                        $SCANNER_HOME/bin/sonar-scanner \
                           -Dsonar.projectKey=sonarqube-project-simbu \
-                          -Dsonar.projectName=sonarqube-project-simbu
-                    '''
+                          -Dsonar.projectName=sonarqube-project-simbu \
+                          -Dsonar.sources=src \
+                          -Dsonar.java.binaries=target/classes
+                    """
                 }
             }
         }
 
-        stage('Package') {
+        stage('Build') {
             steps {
-                sh '''
-                    mvn clean package -DskipTests
-                '''
+                sh 'mvn clean package -DskipTests'
             }
         }
 
         stage('Docker Build') {
             steps {
-                sh '''
-                    docker build -t $IMAGE_NAME:$IMAGE_TAG .
-                '''
+                sh 'docker build -t $DOCKER_IMAGE .'
             }
         }
 
-        stage('Docker Push') {
+        stage('Docker Push to DockerHub') {
             steps {
-                withCredentials([
-                    usernamePassword(
-                        credentialsId: 'dockerhub',
-                        usernameVariable: 'DOCKER_USERNAME',
-                        passwordVariable: 'DOCKER_PASSWORD'
-                    )
-                ]) {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub',
+                    usernameVariable: 'DOCKER_USERNAME',
+                    passwordVariable: 'DOCKER_PASSWORD'
+                )]) {
                     sh '''
                         echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-                        docker push $IMAGE_NAME:$IMAGE_TAG
+                        docker push $DOCKER_IMAGE
                         docker logout
                     '''
                 }
             }
         }
 
-        stage('Run Container') {
+        stage('Run Docker Container') {
             steps {
                 sh '''
                     docker rm -f sonarqube-project-simbu || true
                     docker run -d \
                         --name sonarqube-project-simbu \
                         -p 8081:8080 \
-                        $IMAGE_NAME:$IMAGE_TAG
+                        $DOCKER_IMAGE
                 '''
             }
         }
@@ -100,6 +98,7 @@ pipeline {
             echo 'Pipeline failed'
         }
         always {
+            echo 'Cleaning up workspace...'
             cleanWs()
         }
     }
