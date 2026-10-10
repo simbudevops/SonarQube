@@ -83,7 +83,7 @@ pipeline {
                     docker rm -f sonarqube-project-simbu || true
                     docker run -d \
                         --name sonarqube-project-simbu \
-                        -p 8083:8080 \
+                        -p 8083:5555 \
                         $DOCKER_IMAGE
                 '''
             }
