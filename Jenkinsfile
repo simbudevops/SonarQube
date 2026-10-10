@@ -35,7 +35,7 @@ pipeline {
 
         stage('SonarQube') {
             steps {
-                withSonarQubeEnv('SonarQube') {
+                withSonarQubeEnv('sonar') {
                     sh '''
                         mvn sonar:sonar \
                           -Dsonar.projectKey=sonarqube-project-simbu \
