@@ -8,7 +8,7 @@ pipeline {
 
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
-        IMAGE_NAME   = 'simbudevops7497/sonarqube-project-simbu'
+        IMAGE_NAME   = 'simbudevops/sonarqube-project-simbu'
         IMAGE_TAG    = '1.0.0'
         DOCKER_IMAGE = "${IMAGE_NAME}:${IMAGE_TAG}"
     }
